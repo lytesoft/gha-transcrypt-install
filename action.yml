@@ -1,0 +1,34 @@
+name: Checkout
+description: Checkout repo and decrypt with transcrypt
+inputs:
+  decrypt_key:
+    description: 'Key to decrypt repository files with transcrypt'
+    required: false
+runs:
+  using: composite
+  steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Cache ~/.transcryptbin for v2.3.0-pre
+      if: inputs.decrypt_key != null
+      uses: actions/cache@v3
+      id: cache-transcrypt
+      env:
+        cache-name: cache-transcrypt
+      with:
+        path: ~/.transcryptbin
+        key: ${{ runner.os }}-${{ env.cache-transcrypt }}-v2.3.0-pre
+
+    - name: Install Transcrypt
+      if: inputs.decrypt_key != null && steps.cache-transcrypt.outputs.cache-hit != 'true'
+      run: |
+        mkdir ~/.transcryptbin
+        curl -o  ~/.transcryptbin/transcrypt https://raw.githubusercontent.com/elasticdog/transcrypt/master/transcrypt
+        chmod +x ~/.transcryptbin/transcrypt
+      shell: bash
+
+    - name: Decrypt Repo (previously checked out)
+      if: inputs.decrypt_key != null
+      run: ~/.transcryptbin/transcrypt -c aes-256-cbc -y -p ${{ inputs.decrypt_key }}
+      shell: bash
