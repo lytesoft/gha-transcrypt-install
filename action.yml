@@ -18,7 +18,7 @@ runs:
         cache-name: cache-transcrypt
       with:
         path: ~/.transcryptbin
-        key: ${{ runner.os }}-${{ env.cache-transcrypt }}-v2.3.0-pre
+        key: ${{ runner.os }}-${{ env.cache-name }}-v2.3.0-pre
 
     - name: Install Transcrypt
       if: inputs.decrypt_key != null && steps.cache-transcrypt.outputs.cache-hit != 'true'
